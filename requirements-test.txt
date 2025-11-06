@@ -1,0 +1,8 @@
+pytest>=7.0.0
+pytest-cov>=3.0.0
+pytest-html>=3.0.0
+selenium>=4.0.0
+webdriver-manager>=3.0.0
+pytest-xdist>=2.0.0
+pytest-flask>=1.2.0
+pytest-mock>=3.0.0

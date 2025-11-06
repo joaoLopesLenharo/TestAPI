@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 transition-colors duration-200">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Resumo Diário</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-blue-50 dark:bg-gray-700 p-6 rounded-lg shadow transition-colors duration-200">
+                <h3 class="text-gray-600 dark:text-gray-300 font-medium">Calorias</h3>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_calories|default(0) }} <span class="text-sm font-normal text-gray-500 dark:text-gray-400">/ {{ current_user.daily_calorie_goal }} kcal</span></p>
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mt-4">
+                    {% set progress_percent = (((total_calories|default(0) / current_user.daily_calorie_goal) * 100)|round(0, 'floor')|int) %}
+                    {% set progress_percent = [progress_percent, 100]|min %}
+                    <div class="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: {{ progress_percent if progress_percent is number else 0 }}%;"></div>
+                </div>
+            </div>
+            <div class="bg-green-50 dark:bg-gray-700 p-6 rounded-lg shadow transition-colors duration-200">
+                <h3 class="text-gray-600 dark:text-gray-300 font-medium">Proteínas</h3>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">0g</p>
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mt-4">
+                    <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="bg-yellow-50 dark:bg-gray-700 p-6 rounded-lg shadow transition-colors duration-200">
+                <h3 class="text-gray-600 dark:text-gray-300 font-medium">Carboidratos</h3>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">0g</p>
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mt-4">
+                    <div class="bg-yellow-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 transition-colors duration-200">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Alimentos de Hoje</h2>
+            <button onclick="document.getElementById('addFoodBtn').click()" class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                <i class="fas fa-plus mr-2"></i>Adicionar Alimento
+            </button>
+        </div>
+        
+        {% if entries %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-gray-700">
+                            <th class="py-3 px-4 text-left text-gray-700 dark:text-gray-300 font-medium">Alimento</th>
+                            <th class="py-3 px-4 text-right text-gray-700 dark:text-gray-300 font-medium">Calorias</th>
+                            <th class="py-3 px-4 text-right text-gray-700 dark:text-gray-300 font-medium">Proteínas</th>
+                            <th class="py-3 px-4 text-right text-gray-700 dark:text-gray-300 font-medium">Carboidratos</th>
+                            <th class="py-3 px-4 text-right text-gray-700 dark:text-gray-300 font-medium">Gorduras</th>
+                            <th class="py-3 px-4"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-800 dark:text-gray-200">{{ entry.food_item.name }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ entry.quantity }} porção{% if entry.quantity != 1 %}es{% endif %}</div>
+                            </td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-gray-200">{{ (entry.food_item.calories * entry.quantity)|int }} kcal</td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-gray-200">{{ (entry.food_item.protein * entry.quantity)|round(1) }}g</td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-gray-200">{{ (entry.food_item.carbs * entry.quantity)|round(1) }}g</td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-gray-200">{{ (entry.food_item.fat * entry.quantity)|round(1) }}g</td>
+                            <td class="py-3 px-4 text-right">
+                                <button class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Remover">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-utensils text-4xl mb-3 text-gray-300 dark:text-gray-600"></i>
+                <p class="text-gray-600 dark:text-gray-400">Nenhum alimento adicionado hoje. Adicione alimentos para começar!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-200">
+        <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">Alimentos Recentes</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="recentFoods">
+            <!-- Os alimentos recentes serão carregados aqui via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Carrega alimentos recentes
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/food');
+            const foods = await response.json();
+            const container = document.getElementById('recentFoods');
+            
+            foods.forEach(food => {
+                const foodEl = document.createElement('div');
+                foodEl.className = 'bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200';
+                foodEl.innerHTML = `
+                    <div class="font-medium text-gray-800 dark:text-gray-200">${food.name}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-300">${food.calories} kcal</div>
+                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        P: ${food.protein}g C: ${food.carbs}g G: ${food.fat}g
+                    </div>
+                `;
+                foodEl.onclick = function(event) {
+                    addFoodToToday(food.id, event);
+                };
+                container.appendChild(foodEl);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar alimentos recentes:', error);
+            const container = document.getElementById('recentFoods');
+            container.innerHTML = `
+                <div class="col-span-full text-center py-4 text-red-500 dark:text-red-400">
+                    Erro ao carregar alimentos recentes. Tente recarregar a página.
+                </div>
+            `;
+        }
+    });
+
+    // Função para adicionar alimento às entradas de hoje
+    async function addFoodToToday(foodId, event) {
+        const button = event.target.closest('div');
+        const originalContent = button.innerHTML;
+        
+        try {
+            // Feedback visual de carregamento
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adicionando...';
+            button.classList.add('opacity-75', 'cursor-not-allowed');
+            
+            const response = await fetch('/api/entry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ food_id: foodId, quantity: 1 })
+            });
+
+            if (response.ok) {
+                // Feedback visual de sucesso
+                button.innerHTML = '<i class="fas fa-check"></i> Adicionado!';
+                button.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'dark:bg-gray-700', 'dark:hover:bg-gray-600');
+                button.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900', 'dark:text-green-300');
+                
+                // Recarrega a página após um pequeno atraso para o usuário ver o feedback
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+            } else {
+                throw new Error('Falha ao adicionar alimento');
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar alimento:', error);
+            
+            // Feedback visual de erro
+            button.innerHTML = '<i class="fas fa-times"></i> Erro';
+            button.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'dark:bg-gray-700', 'dark:hover:bg-gray-600');
+            button.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900', 'dark:text-red-300');
+            
+            // Restaura o botão após alguns segundos
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.className = 'bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200';
+            }, 2000);
+            
+            // Mostra mensagem de erro
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg';
+            errorDiv.textContent = 'Erro ao adicionar alimento. Tente novamente.';
+            document.body.appendChild(errorDiv);
+            
+            // Remove a mensagem após 3 segundos
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 3000);
+        }
+    }
+</script>
+{% endblock %}

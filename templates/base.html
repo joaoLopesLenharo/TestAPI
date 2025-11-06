@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador de Calorias</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        // Verifica a preferência de tema do sistema
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <nav class="bg-blue-600 dark:bg-blue-900 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Rastreador de Calorias</a>
+            <div class="space-x-4">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="hover:bg-blue-500 dark:hover:bg-blue-700 px-3 py-2 rounded transition-colors">Painel</a>
+                    <a href="#" class="hover:bg-blue-500 dark:hover:bg-blue-700 px-3 py-2 rounded transition-colors" id="addFoodBtn">Adicionar Alimento</a>
+                    <a href="{{ url_for('logout') }}" class="hover:bg-blue-500 dark:hover:bg-blue-700 px-3 py-2 rounded transition-colors">Sair</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="hover:bg-blue-500 dark:hover:bg-blue-700 px-3 py-2 rounded transition-colors">Entrar</a>
+                    <a href="{{ url_for('register') }}" class="bg-white text-blue-600 px-3 py-2 rounded hover:bg-gray-200">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 text-white rounded {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Add Food Modal -->
+    <div id="foodModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Add Food</h2>
+            <form id="foodForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Food Name</label>
+                    <input type="text" name="name" required class="w-full p-2 border rounded">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Calories</label>
+                        <input type="number" name="calories" required class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Quantity</label>
+                        <input type="number" name="quantity" value="1" step="0.1" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm mb-1">Protein (g)</label>
+                        <input type="number" name="protein" value="0" step="0.1" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm mb-1">Carbs (g)</label>
+                        <input type="number" name="carbs" value="0" step="0.1" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm mb-1">Fat (g)</label>
+                        <input type="number" name="fat" value="0" step="0.1" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('foodModal');
+        const addFoodBtn = document.getElementById('addFoodBtn');
+        
+        if (addFoodBtn) {
+            addFoodBtn.onclick = function() {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            };
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Handle form submission
+        const foodForm = document.getElementById('foodForm');
+        if (foodForm) {
+            foodForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const formData = new FormData(foodForm);
+                const data = {
+                    name: formData.get('name'),
+                    calories: parseFloat(formData.get('calories')),
+                    protein: parseFloat(formData.get('protein') || 0),
+                    carbs: parseFloat(formData.get('carbs') || 0),
+                    fat: parseFloat(formData.get('fat') || 0),
+                    quantity: parseFloat(formData.get('quantity') || 1)
+                };
+
+                try {
+                    // First add the food item
+                    const foodResponse = await fetch('/api/food', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const foodData = await foodResponse.json();
+                    
+                    if (!foodResponse.ok) throw new Error(foodData.message || 'Failed to add food');
+
+                    // Then add the food entry
+                    const entryResponse = await fetch('/api/entry', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            food_item_id: foodData.id,
+                            quantity: data.quantity
+                        })
+                    });
+
+                    if (!entryResponse.ok) {
+                        const errorData = await entryResponse.json();
+                        throw new Error(errorData.message || 'Failed to add entry');
+                    }
+
+                    // Reload the page to show the new entry
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message);
+                }
+            };
+        }
+    </script>
+</body>
+</html>
