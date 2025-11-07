@@ -26,6 +26,23 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     daily_calorie_goal = db.Column(db.Integer, default=2000)
     entries = db.relationship('FoodEntry', backref='user', lazy=True)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def get_calories_today(self):
+        today = datetime.utcnow().date()
+        entries = FoodEntry.query.filter_by(user_id=self.id, date=today).all()
+        return sum(entry.food_item.calories * entry.quantity for entry in entries)
+    
+    def get_remaining_calories(self):
+        return max(0, self.daily_calorie_goal - self.get_calories_today())
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +53,9 @@ class FoodItem(db.Model):
     fat = db.Column(db.Float, default=0)
     is_public = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    def __repr__(self):
+        return f'<FoodItem {self.name}>'
 
 class FoodEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,6 +64,9 @@ class FoodEntry(db.Model):
     food_item_id = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=False)
     quantity = db.Column(db.Float, default=1.0)
     food_item = db.relationship('FoodItem')
+    
+    def __repr__(self):
+        return f'<FoodEntry {self.user.username} - {self.food_item.name} - {self.date} - {self.quantity} serving(s)>'
 
 # Initialize database
 with app.app_context():
@@ -130,8 +153,25 @@ def logout():
 def dashboard():
     today = datetime.utcnow().date()
     entries = FoodEntry.query.filter_by(user_id=current_user.id, date=today).all()
-    total_calories = sum(entry.food_item.calories * entry.quantity for entry in entries)
-    return render_template('dashboard.html', entries=entries, total_calories=total_calories)
+    
+    # Calcula totais nutricionais
+    total_calories = 0
+    total_protein = 0
+    total_carbs = 0
+    total_fat = 0
+    
+    for entry in entries:
+        total_calories += entry.food_item.calories * entry.quantity
+        total_protein += entry.food_item.protein * entry.quantity
+        total_carbs += entry.food_item.carbs * entry.quantity
+        total_fat += entry.food_item.fat * entry.quantity
+    
+    return render_template('dashboard.html', 
+                         entries=entries, 
+                         total_calories=round(total_calories, 1),
+                         total_protein=round(total_protein, 1),
+                         total_carbs=round(total_carbs, 1),
+                         total_fat=round(total_fat, 1))
 
 # API Routes
 @app.route('/api/food', methods=['GET', 'POST'])

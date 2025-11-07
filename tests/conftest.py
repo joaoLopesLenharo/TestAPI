@@ -1,42 +1,63 @@
 import os
 import tempfile
 import pytest
+from werkzeug.security import generate_password_hash
 from app import app, db, User, FoodItem, FoodEntry
 from datetime import datetime, timedelta
 
 @pytest.fixture(scope='module')
-def test_client():
-    # Configuração do aplicativo para testes
+def test_app():
+    # Configura o aplicativo para testes
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Cria o banco de dados e carrega os dados de teste
+    with app.app_context():
+        db.drop_all()  # Garante que o banco está limpo
+        db.create_all()
+        setup_test_data()
     
+    yield app
+    
+    # Limpeza após todos os testes do módulo
+    with app.app_context():
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture(scope='module')
+def test_client(test_app):
     # Cria um cliente de teste
-    with app.test_client() as testing_client:
+    with test_app.test_client() as testing_client:
         # Estabelece um contexto de aplicativo
-        with app.app_context():
-            # Cria o banco de dados e as tabelas
-            db.create_all()
-            
-            # Configuração de dados de teste
-            setup_test_data()
-            
-            yield testing_client  # Aqui ocorre o teste
+        with test_app.app_context():
+            yield testing_client
             
             # Limpeza após o teste
             db.session.remove()
             db.drop_all()
 
 def setup_test_data():
+    # Limpa dados existentes para evitar conflitos (ordem respeitando foreign keys)
+    try:
+        db.session.query(FoodEntry).delete()
+        db.session.query(FoodItem).delete()
+        db.session.query(User).delete()
+        db.session.commit()
+    except Exception:
+        # Se houver erro, faz rollback e continua
+        db.session.rollback()
+    
     # Cria um usuário de teste
-    hashed_password = User.generate_password_hash('test123')
     user = User(
         username='testuser',
         email='test@example.com',
-        password_hash=hashed_password,
         daily_calorie_goal=2000
     )
+    user.set_password('test123')
     db.session.add(user)
+    db.session.flush()  # Para obter o ID do usuário
     
     # Cria itens de comida de teste
     food1 = FoodItem(
@@ -56,7 +77,7 @@ def setup_test_data():
     )
     
     db.session.add_all([food1, food2])
-    db.session.commit()
+    db.session.flush()  # Para obter os IDs dos itens
     
     # Cria entradas de comida para o usuário
     today = datetime.utcnow().date()
@@ -84,21 +105,28 @@ def new_user():
     user = User(
         username='newuser',
         email='newuser@example.com',
-        password_hash=User.generate_password_hash('password123'),
+        password_hash=generate_password_hash('password123'),
         daily_calorie_goal=2500
     )
     return user
 
 @pytest.fixture(scope='module')
-def test_user():
-    return User.query.filter_by(username='testuser').first()
+def test_user(test_app):
+    with test_app.app_context():
+        return User.query.filter_by(username='testuser').first()
 
-@pytest.fixture(scope='module')
-def auth_client(test_client, test_user):
-    # Realiza login para obter o token
-    response = test_client.post('/login', data=dict(
-        username='testuser',
-        password='test123'
-    ), follow_redirects=True)
+@pytest.fixture(scope='function')
+def auth_client(test_client, test_user, test_app):
+    # Realiza login
+    with test_app.app_context():
+        with test_client.session_transaction() as session:
+            session['_user_id'] = str(test_user.id)
+            session['_fresh'] = True
     
-    return test_client
+    # Retorna o cliente autenticado
+    yield test_client
+    
+    # Limpa a sessão após o teste
+    with test_app.app_context():
+        with test_client.session_transaction() as session:
+            session.clear()

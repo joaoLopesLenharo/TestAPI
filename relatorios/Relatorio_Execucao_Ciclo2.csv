@@ -1,0 +1,8 @@
+ID,Objetivo,Resultado,Status,Evidência,Observações,Data Execução,Executor
+CT-001,Verificar login válido,Passou,PASSOU,VID-001-R IMG-001-R,Login funcionou corretamente,2025-01-22,Executor1
+CT-002,Verificar login inválido,Passou,PASSOU,IMG-002-R,Mensagem de erro exibida corretamente,2025-01-22,Executor1
+CT-007,Verificar adição de alimento ao diário,Passou,PASSOU,VID-007-R IMG-007-R,Alimento adicionado com sucesso,2025-01-22,Executor2
+CT-009,Verificar cálculo de calorias diárias,Passou,PASSOU,VID-009-R IMG-009-R,Cálculo correto,2025-01-22,Executor3
+CT-011,Verificar cálculo de macronutrientes,Passou,PASSOU,VID-011-R IMG-011-R,Cálculo correto,2025-01-22,Executor3
+CT-030,Verificar fluxo E2E completo,Passou,PASSOU,VID-030-R IMG-030-R,BUG-002 corrigido - Status atualiza imediatamente,2025-01-22,Executor2
+

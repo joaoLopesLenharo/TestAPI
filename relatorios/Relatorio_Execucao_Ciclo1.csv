@@ -1,0 +1,22 @@
+ID,Objetivo,Resultado,Status,Evidência,Observações,Data Execução,Executor
+CT-001,Verificar login válido,Passou,PASSOU,VID-001 IMG-001,Login funcionou corretamente,2025-01-15,Executor1
+CT-002,Verificar login inválido,Passou,PASSOU,IMG-002,Mensagem de erro exibida corretamente,2025-01-15,Executor1
+CT-003,Verificar registro de usuário válido,Passou,PASSOU,VID-003 IMG-003,Registro funcionou corretamente,2025-01-15,Executor1
+CT-004,Verificar registro com username duplicado,Passou,PASSOU,IMG-004,Validação funcionou corretamente,2025-01-15,Executor1
+CT-005,Verificar listagem de alimentos,Passou,PASSOU,IMG-005,Lista retornada corretamente,2025-01-15,Executor2
+CT-006,Verificar listagem de alimentos vazia,Passou,PASSOU,IMG-006,Lista vazia retornada corretamente,2025-01-15,Executor2
+CT-007,Verificar adição de alimento ao diário,Passou,PASSOU,VID-007 IMG-007,Alimento adicionado com sucesso,2025-01-15,Executor2
+CT-008,Verificar adição de alimento com quantidade inválida,Passou,PASSOU,IMG-008,Validação funcionou corretamente,2025-01-15,Executor2
+CT-009,Verificar cálculo de calorias diárias,Passou,PASSOU,VID-009 IMG-009,Cálculo correto,2025-01-15,Executor3
+CT-010,Verificar cálculo de calorias restantes,Passou,PASSOU,IMG-010,Cálculo correto,2025-01-15,Executor3
+CT-011,Verificar cálculo de macronutrientes,Passou,PASSOU,VID-011 IMG-011,Cálculo correto,2025-01-15,Executor3
+CT-012,Verificar cálculo com múltiplas entradas,Passou,PASSOU,IMG-012,Cálculo correto,2025-01-15,Executor3
+CT-013,Verificar diário vazio,Passou,PASSOU,IMG-013,Totais zerados corretamente,2025-01-15,Executor1
+CT-014,Verificar meta completa como restante,Passou,PASSOU,IMG-014,Valor correto,2025-01-15,Executor1
+CT-015,Verificar validação de quantidade zero,Passou,PASSOU,IMG-015,Validação funcionou,2025-01-15,Executor2
+CT-016,Verificar acesso não autorizado,Passou,PASSOU,IMG-016,Redirecionamento funcionou,2025-01-15,Executor1
+CT-017,Verificar logout,Passou,PASSOU,VID-017 IMG-017,Logout funcionou corretamente,2025-01-15,Executor1
+CT-018,Verificar usabilidade - mensagens claras,Passou,PASSOU,VID-018 IMG-018,Mensagens claras e visíveis,2025-01-15,Executor3
+CT-019,Verificar tempo de resposta,Passou,PASSOU,VID-019,Tempo < 2s,2025-01-15,Executor3
+CT-030,Verificar fluxo E2E completo,Falhou,FALHOU,VID-030-F IMG-030-F,BUG-002: Status não atualiza imediatamente,2025-01-15,Executor2
+
