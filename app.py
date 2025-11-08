@@ -18,6 +18,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Handler para retornar JSON em APIs quando não autenticado
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    # Se a requisição é para uma API, retorna JSON 401
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Authentication required'}), 401
+    # Caso contrário, redireciona para login (comportamento padrão)
+    return redirect(url_for('login'))
+
 # Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -179,19 +188,31 @@ def dashboard():
 def api_food():
     if request.method == 'POST':
         data = request.get_json()
-        food = FoodItem(
-            name=data['name'],
-            calories=data['calories'],
-            protein=data.get('protein', 0),
-            carbs=data.get('carbs', 0),
-            fat=data.get('fat', 0),
-            is_public=data.get('is_public', True),
-            user_id=current_user.id
-        )
-        db.session.add(food)
-        db.session.commit()
-        return jsonify({'message': 'Food item added', 'id': food.id}), 201
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Validação de campos obrigatórios
+        if 'name' not in data or 'calories' not in data:
+            return jsonify({'error': 'Name and calories are required'}), 400
+        
+        try:
+            food = FoodItem(
+                name=data['name'],
+                calories=data['calories'],
+                protein=data.get('protein', 0),
+                carbs=data.get('carbs', 0),
+                fat=data.get('fat', 0),
+                is_public=data.get('is_public', True),
+                user_id=current_user.id
+            )
+            db.session.add(food)
+            db.session.commit()
+            return jsonify({'message': 'Food item added', 'id': food.id}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
     
+    # GET - Listar alimentos
     foods = FoodItem.query.filter(
         (FoodItem.is_public == True) | (FoodItem.user_id == current_user.id)
     ).all()
@@ -208,15 +229,44 @@ def api_food():
 @login_required
 def add_entry():
     data = request.get_json()
-    entry = FoodEntry(
-        user_id=current_user.id,
-        food_item_id=data['food_item_id'],
-        quantity=data.get('quantity', 1.0),
-        date=datetime.utcnow().date()
-    )
-    db.session.add(entry)
-    db.session.commit()
-    return jsonify({'message': 'Entry added', 'id': entry.id}), 201
+    
+    # Validação de dados
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Verifica se food_item_id foi fornecido
+    if 'food_item_id' not in data:
+        return jsonify({'error': 'food_item_id is required'}), 400
+    
+    food_item_id = data['food_item_id']
+    quantity = data.get('quantity', 1.0)
+    
+    # Validação de quantidade
+    if quantity <= 0:
+        return jsonify({'error': 'Quantity must be greater than 0'}), 400
+    
+    # Verifica se o food_item existe
+    food_item = FoodItem.query.get(food_item_id)
+    if not food_item:
+        return jsonify({'error': 'Food item not found'}), 404
+    
+    # Verifica se o usuário tem acesso ao food_item (é público ou é do usuário)
+    if not food_item.is_public and food_item.user_id != current_user.id:
+        return jsonify({'error': 'Food item not accessible'}), 403
+    
+    try:
+        entry = FoodEntry(
+            user_id=current_user.id,
+            food_item_id=food_item_id,
+            quantity=quantity,
+            date=datetime.utcnow().date()
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify({'message': 'Entry added', 'id': entry.id}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

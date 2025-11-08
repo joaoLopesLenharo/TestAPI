@@ -7,10 +7,15 @@ from datetime import datetime, timedelta
 
 @pytest.fixture(scope='module')
 def test_app():
+    # Cria um arquivo temporário único para cada módulo de teste
+    # Isso garante que cada módulo tenha seu próprio banco isolado
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    os.close(db_fd)  # Fecha o file descriptor, mas mantém o arquivo
+    
     # Configura o aplicativo para testes
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Cria o banco de dados e carrega os dados de teste
@@ -25,6 +30,15 @@ def test_app():
     with app.app_context():
         db.session.remove()
         db.drop_all()
+        # Fecha todas as conexões do banco
+        db.engine.dispose()
+    
+    # Remove o arquivo temporário após fechar todas as conexões
+    try:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
+    except OSError:
+        pass  # Arquivo já foi removido ou está em uso
 
 @pytest.fixture(scope='module')
 def test_client(test_app):
@@ -39,15 +53,8 @@ def test_client(test_app):
             db.drop_all()
 
 def setup_test_data():
-    # Limpa dados existentes para evitar conflitos (ordem respeitando foreign keys)
-    try:
-        db.session.query(FoodEntry).delete()
-        db.session.query(FoodItem).delete()
-        db.session.query(User).delete()
-        db.session.commit()
-    except Exception:
-        # Se houver erro, faz rollback e continua
-        db.session.rollback()
+    # Como o banco foi limpo e recriado antes de chamar esta função,
+    # podemos criar os dados diretamente sem verificar se existem
     
     # Cria um usuário de teste
     user = User(

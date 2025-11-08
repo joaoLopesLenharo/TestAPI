@@ -81,13 +81,37 @@ def test_add_food_entry_invalid_data(test_client, auth_client):
     
     assert response.status_code in [400, 404, 500]  # Pode retornar diferentes códigos dependendo da validação
 
-def test_unauthorized_access(test_client):
+def test_unauthorized_access(test_app):
     """
     Testa o acesso não autorizado às rotas da API
     """
-    # Tenta acessar sem autenticação
-    response = test_client.get('/api/food')
-    assert response.status_code in [401, 302]  # Pode redirecionar para login (302) ou retornar 401
-    
-    response = test_client.post('/api/entry', json={})
-    assert response.status_code in [401, 302]  # Pode redirecionar para login (302) ou retornar 401
+    # Cria um novo cliente de teste sem autenticação
+    # Isso garante que não há sessão compartilhada de outros testes
+    with test_app.test_client() as client:
+        # Limpa qualquer sessão existente
+        with client.session_transaction() as session:
+            session.clear()
+        
+        # Tenta acessar sem autenticação
+        # O Flask-Login com @login_required deve chamar unauthorized_handler
+        # que retorna 401 para APIs
+        response = client.get('/api/food')
+        
+        # Verifica se retorna 401 (JSON) ou 302 (redirect)
+        # O handler unauthorized_handler deve retornar 401 para APIs
+        assert response.status_code in [401, 302]
+        
+        # Se retornou 401, verifica se é JSON
+        if response.status_code == 401:
+            assert response.is_json
+            data = response.get_json()
+            assert 'error' in data or 'message' in data
+        
+        # Testa POST sem autenticação
+        response = client.post('/api/entry', json={})
+        # Deve retornar 401 ou 302 (não autenticado) antes da validação
+        assert response.status_code in [401, 302]
+        
+        # Se retornou 401, verifica se é JSON
+        if response.status_code == 401:
+            assert response.is_json

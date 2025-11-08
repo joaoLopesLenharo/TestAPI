@@ -16,14 +16,14 @@
             </div>
             <div class="bg-green-50 dark:bg-gray-700 p-6 rounded-lg shadow transition-colors duration-200">
                 <h3 class="text-gray-600 dark:text-gray-300 font-medium">Proteínas</h3>
-                <p class="text-2xl font-bold text-gray-800 dark:text-white">0g</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_protein|default(0)|round(1) }}g</p>
                 <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mt-4">
                     <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: 0%;"></div>
                 </div>
             </div>
             <div class="bg-yellow-50 dark:bg-gray-700 p-6 rounded-lg shadow transition-colors duration-200">
                 <h3 class="text-gray-600 dark:text-gray-300 font-medium">Carboidratos</h3>
-                <p class="text-2xl font-bold text-gray-800 dark:text-white">0g</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_carbs|default(0)|round(1) }}g</p>
                 <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mt-4">
                     <div class="bg-yellow-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" style="width: 0%;"></div>
                 </div>
@@ -138,7 +138,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ food_id: foodId, quantity: 1 })
+                body: JSON.stringify({ food_item_id: foodId, quantity: 1 })
             });
 
             if (response.ok) {

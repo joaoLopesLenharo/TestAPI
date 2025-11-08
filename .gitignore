@@ -1,5 +1,32 @@
-﻿venv/*
-instance/*
-test/*
+﻿# Virtual environment
+venv/
+.env/
 
+# Arquivos Python compilados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
+# Arquivos de cobertura
+.coverage
+htmlcov/
+coverage.xml
+
+# Instância do Flask (se usar)
+instance/
+
+# Relatórios de testes
+tests/reports/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+*.bak
+
+# Diretórios de IDE
+.vscode/
+.idea/
