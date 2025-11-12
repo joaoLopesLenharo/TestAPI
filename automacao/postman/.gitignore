@@ -1,0 +1,14 @@
+# Relatórios gerados pelo Newman
+reports/
+*.html
+*.json
+!CalorieTracker.postman_collection.json
+!local.postman_environment.json
+
+# Arquivos temporários
+*.tmp
+*.log
+
+# Mantém a estrutura do diretório reports
+!reports/.gitkeep
+

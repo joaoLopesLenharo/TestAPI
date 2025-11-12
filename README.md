@@ -97,10 +97,32 @@ Após executar o seed, você pode usar as seguintes credenciais:
 
 ## 🧪 Executando os Testes
 
-### Opção 1: Executar todos os testes
+### Opção 1: Executar todos os testes (Recomendado)
 
 ```bash
-# Executa todos os testes e gera relatórios
+# Executa todos os testes e gera relatórios formatados
+python run_tests.py
+
+# Com opções adicionais:
+python run_tests.py --open-report    # Abre relatório automaticamente
+python run_tests.py --install-deps   # Instala dependências antes
+python run_tests.py --no-browser     # Não abre navegador
+```
+
+### Opção 1b: Gerar relatório para apresentação
+
+```bash
+# Gera relatório visual formatado para apresentação
+python generate_presentation_report.py
+```
+
+### Opção 1c: Limpar projeto antes de executar
+
+```bash
+# Limpa arquivos temporários e cache
+python cleanup.py
+
+# Depois execute os testes
 python run_tests.py
 ```
 
@@ -114,10 +136,13 @@ pytest tests/unit/ -v
 pytest tests/integration/ -v
 
 # Testes E2E (requer o servidor em execução)
+# Por padrão, os testes E2E executam em modo VISUAL (você pode ver o navegador)
 # Primeiro, inicie o servidor em outro terminal:
 # python app.py
-# Depois execute:
-pytest tests/e2e/ -v
+# Depois execute (modo visual - padrão):
+pytest tests/e2e/ -v -s
+# Para executar em modo headless (sem interface gráfica):
+# HEADLESS=1 pytest tests/e2e/ -v
 
 # Testes TDD (exemplo)
 pytest tests/tdd_example/ -v
@@ -533,6 +558,32 @@ python scripts/seed_data.py
 ```
 
 ---
+
+## 🧹 Limpeza e Manutenção
+
+### Script de Limpeza
+
+Execute regularmente para manter o projeto organizado:
+
+```bash
+python cleanup.py
+```
+
+Remove:
+- Arquivos `__pycache__` e `.pytest_cache`
+- Arquivos compilados Python (`.pyc`, `.pyo`, `.pyd`)
+- Arquivos temporários (`.tmp`, `.swp`, `.bak`)
+- Logs antigos
+- Relatórios HTML antigos (mantém apenas o mais recente)
+
+### Scripts Disponíveis
+
+| Script | Descrição |
+|--------|-----------|
+| `python run_tests.py` | Executa testes e gera relatórios |
+| `python generate_presentation_report.py` | Gera relatório visual para apresentação |
+| `python cleanup.py` | Limpa arquivos temporários e cache |
+| `python run_e2e_tests.py` | Executa testes E2E de forma interativa |
 
 ## 🐛 Solução de Problemas
 

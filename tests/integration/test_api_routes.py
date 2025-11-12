@@ -43,7 +43,7 @@ def test_add_food_entry(test_client, auth_client, test_user):
     assert 'id' in response_data
     
     # Verifica se a entrada foi criada no banco de dados
-    entry = FoodEntry.query.get(response_data['id'])
+    entry = db.session.get(FoodEntry, response_data['id'])
     assert entry is not None
     assert entry.user_id == test_user.id
     assert entry.food_item_id == food.id
@@ -88,18 +88,22 @@ def test_unauthorized_access(test_app):
     # Cria um novo cliente de teste sem autenticação
     # Isso garante que não há sessão compartilhada de outros testes
     with test_app.test_client() as client:
-        # Limpa qualquer sessão existente
+        # Limpa qualquer sessão existente explicitamente
         with client.session_transaction() as session:
             session.clear()
+            # Remove qualquer chave relacionada ao Flask-Login
+            session.pop('_user_id', None)
+            session.pop('_fresh', None)
+            session.pop('_id', None)
         
         # Tenta acessar sem autenticação
         # O Flask-Login com @login_required deve chamar unauthorized_handler
         # que retorna 401 para APIs
-        response = client.get('/api/food')
+        response = client.get('/api/food', follow_redirects=False)
         
         # Verifica se retorna 401 (JSON) ou 302 (redirect)
         # O handler unauthorized_handler deve retornar 401 para APIs
-        assert response.status_code in [401, 302]
+        assert response.status_code in [401, 302], f"Expected 401 or 302, got {response.status_code}"
         
         # Se retornou 401, verifica se é JSON
         if response.status_code == 401:
@@ -107,10 +111,17 @@ def test_unauthorized_access(test_app):
             data = response.get_json()
             assert 'error' in data or 'message' in data
         
+        # Limpa novamente antes do próximo teste
+        with client.session_transaction() as session:
+            session.clear()
+            session.pop('_user_id', None)
+            session.pop('_fresh', None)
+            session.pop('_id', None)
+        
         # Testa POST sem autenticação
-        response = client.post('/api/entry', json={})
+        response = client.post('/api/entry', json={}, follow_redirects=False)
         # Deve retornar 401 ou 302 (não autenticado) antes da validação
-        assert response.status_code in [401, 302]
+        assert response.status_code in [401, 302], f"Expected 401 or 302, got {response.status_code}"
         
         # Se retornou 401, verifica se é JSON
         if response.status_code == 401:

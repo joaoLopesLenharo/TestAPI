@@ -1,32 +1,292 @@
-﻿# Virtual environment
-venv/
-.env/
+# ============================================
+# Python
+# ============================================
 
-# Arquivos Python compilados
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ============================================
+# IDEs e Editores
+# ============================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# Testes e Relatórios
+# ============================================
+
+# Relatórios de testes (mantém apenas alguns arquivos importantes)
+tests/reports/*
+!tests/reports/.gitkeep
+!tests/reports/presentation_report.html
+!tests/reports/report.html
+!tests/reports/coverage/
+tests/reports/coverage/*
+!tests/reports/coverage/.gitignore
+
+# Relatórios de cobertura
+htmlcov/
+.coverage
+coverage.xml
+tests/reports/coverage.json
+
+# Relatórios do Postman/Newman
+automacao/postman/reports/
+automacao/postman/*.html
+automacao/postman/*.json
+!automacao/postman/CalorieTracker.postman_collection.json
+!automacao/postman/local.postman_environment.json
+
+# ============================================
+# Banco de Dados
+# ============================================
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+instance/
+calories.db
+
+# ============================================
+# Arquivos Temporários
+# ============================================
+
+# Arquivos temporários do sistema
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# Arquivos de log
+*.log
+logs/
+
+# ============================================
+# Sistema Operacional
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# Arquivos Específicos do Projeto
+# ============================================
+
+# Arquivos de configuração local
+config.local.py
+settings.local.py
+
+# Arquivos de dados de teste grandes
+test_data/
+*.csv.bak
+*.xlsx.bak
+
+# ============================================
+# Outros
+# ============================================
+
+# Arquivos de senha/chave
+secrets.txt
+*.key
+*.pem
+*.cert
+
+# Arquivos de backup
+*.bak
+*.backup
+*.old
+
+# Arquivos compilados
 *.pyc
 *.pyo
 *.pyd
 
-# Arquivos de cobertura
-.coverage
-htmlcov/
-coverage.xml
-
-# Instância do Flask (se usar)
-instance/
-
-# Relatórios de testes
-tests/reports/
-
-# Logs
-*.log
-
-# Arquivos temporários
-*.tmp
-*.swp
-*.bak
-
-# Diretórios de IDE
-.vscode/
-.idea/
+# Arquivos de cache
+.cache/
+*.cache
+venv/*

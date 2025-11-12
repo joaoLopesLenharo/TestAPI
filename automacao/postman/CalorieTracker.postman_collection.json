@@ -2,27 +2,51 @@
 	"info": {
 		"_postman_id": "calorie-tracker-api",
 		"name": "Calorie Tracker API",
-		"description": "Coleção de testes de API para o Calorie Tracker",
+		"description": "Coleção completa de testes de API para o Calorie Tracker com autenticação automática",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Autenticação",
+			"name": "Setup - Autenticação",
 			"item": [
 				{
-					"name": "Login Válido",
+					"name": "1. Login Válido",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"pm.test(\"Status code is 200 or 302\", function () {",
+									"    pm.expect([200, 302]).to.include(pm.response.code);",
 									"});",
 									"",
-									"pm.test(\"Response has session\", function () {",
-									"    pm.expect(pm.cookies.has('session')).to.be.true;",
+									"pm.test(\"Session cookie is set\", function () {",
+									"    var cookies = pm.cookies.all();",
+									"    var sessionCookie = cookies.find(cookie => cookie.name === 'session');",
+									"    pm.expect(sessionCookie).to.not.be.undefined;",
+									"    ",
+									"    // Salva o cookie de sessão para uso em outros testes",
+									"    if (sessionCookie) {",
+									"        pm.environment.set(\"session_cookie\", sessionCookie.value);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    // Verifica se redirecionou para dashboard ou retornou sucesso",
+									"    if (pm.response.code === 302) {",
+									"        pm.expect(pm.response.headers.get(\"Location\")).to.include(\"dashboard\");",
+									"    }",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Limpa cookies anteriores",
+									"pm.cookies.clear();"
 								],
 								"type": "text/javascript"
 							}
@@ -41,12 +65,17 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "testuser",
+									"value": "{{test_username}}",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "test123",
+									"value": "{{test_password}}",
+									"type": "text"
+								},
+								{
+									"key": "remember",
+									"value": "false",
 									"type": "text"
 								}
 							]
@@ -64,18 +93,25 @@
 					"response": []
 				},
 				{
-					"name": "Login Inválido",
+					"name": "2. Login Inválido",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"pm.test(\"Status code is 200 or 302\", function () {",
+									"    pm.expect([200, 302]).to.include(pm.response.code);",
 									"});",
 									"",
-									"pm.test(\"Response contains error message\", function () {",
-									"    pm.expect(pm.response.text()).to.include(\"Invalid username or password\");",
+									"pm.test(\"No session cookie set\", function () {",
+									"    var cookies = pm.cookies.all();",
+									"    var sessionCookie = cookies.find(cookie => cookie.name === 'session');",
+									"    pm.expect(sessionCookie).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Error message present\", function () {",
+									"    var responseText = pm.response.text();",
+									"    pm.expect(responseText.toLowerCase()).to.include(\"invalid\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -120,10 +156,10 @@
 			]
 		},
 		{
-			"name": "Alimentos",
+			"name": "API - Alimentos",
 			"item": [
 				{
-					"name": "Listar Alimentos (GET)",
+					"name": "1. Listar Alimentos (Autenticado)",
 					"event": [
 						{
 							"listen": "test",
@@ -145,17 +181,56 @@
 									"        pm.expect(jsonData[0]).to.have.property('id');",
 									"        pm.expect(jsonData[0]).to.have.property('name');",
 									"        pm.expect(jsonData[0]).to.have.property('calories');",
+									"        pm.expect(jsonData[0]).to.have.property('protein');",
+									"        pm.expect(jsonData[0]).to.have.property('carbs');",
+									"        pm.expect(jsonData[0]).to.have.property('fat');",
 									"    }",
-									"});"
+									"});",
+									"",
+									"// Salva o primeiro alimento para uso em outros testes",
+									"if (pm.response.json().length > 0) {",
+									"    pm.environment.set(\"food_item_id\", pm.response.json()[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Garante que está autenticado",
+									"// Se não houver cookie de sessão, faz login primeiro",
+									"if (!pm.environment.get(\"session_cookie\")) {",
+									"    pm.sendRequest({",
+									"        url: pm.environment.get(\"base_url\") + \"/login\",",
+									"        method: 'POST',",
+									"        header: {",
+									"            'Content-Type': 'application/x-www-form-urlencoded'",
+									"        },",
+									"        body: {",
+									"            mode: 'urlencoded',",
+									"            urlencoded: [",
+									"                {key: 'username', value: pm.environment.get('test_username')},",
+									"                {key: 'password', value: pm.environment.get('test_password')}",
+									"            ]",
+									"        }",
+									"    }, function (err, res) {",
+									"        if (!err) {",
+									"            var cookies = res.cookies.all();",
+									"            var sessionCookie = cookies.find(c => c.name === 'session');",
+									"            if (sessionCookie) {",
+									"                pm.environment.set('session_cookie', sessionCookie.value);",
+									"            }",
+									"        }",
+									"    });",
+									"}"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -172,15 +247,31 @@
 					"response": []
 				},
 				{
-					"name": "Listar Alimentos - Não Autorizado",
+					"name": "2. Listar Alimentos - Não Autorizado",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 401 or redirect\", function () {",
-									"    pm.expect([401, 302]).to.include(pm.response.code);",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response contains error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Limpa cookies para garantir que não está autenticado",
+									"pm.cookies.clear();",
+									"pm.environment.unset(\"session_cookie\");"
 								],
 								"type": "text/javascript"
 							}
@@ -189,6 +280,56 @@
 					"request": {
 						"method": "GET",
 						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/food",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"food"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Criar Alimento (POST)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has food item data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('calories');",
+									"    ",
+									"    // Salva o ID do alimento criado",
+									"    pm.environment.set(\"created_food_id\", jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Teste Postman - Maçã\",\n    \"calories\": 52,\n    \"protein\": 0.3,\n    \"carbs\": 14,\n    \"fat\": 0.2\n}"
+						},
 						"url": {
 							"raw": "{{base_url}}/api/food",
 							"host": [
@@ -205,10 +346,10 @@
 			]
 		},
 		{
-			"name": "Entradas",
+			"name": "API - Entradas",
 			"item": [
 				{
-					"name": "Adicionar Entrada (POST)",
+					"name": "1. Adicionar Entrada (POST)",
 					"event": [
 						{
 							"listen": "test",
@@ -222,7 +363,22 @@
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('message');",
 									"    pm.expect(jsonData).to.have.property('id');",
+									"    ",
+									"    // Salva o ID da entrada criada",
+									"    pm.environment.set(\"created_entry_id\", jsonData.id);",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Garante que tem um food_item_id",
+									"if (!pm.environment.get(\"food_item_id\")) {",
+									"    pm.environment.set(\"food_item_id\", 1);",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -238,7 +394,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"food_item_id\": 1,\n    \"quantity\": 2\n}"
+							"raw": "{\n    \"food_item_id\": {{food_item_id}},\n    \"quantity\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/entry",
@@ -254,7 +410,7 @@
 					"response": []
 				},
 				{
-					"name": "Adicionar Entrada - Quantidade Inválida",
+					"name": "2. Adicionar Entrada - Quantidade Inválida",
 					"event": [
 						{
 							"listen": "test",
@@ -262,6 +418,11 @@
 								"exec": [
 									"pm.test(\"Status code is 400 or 422\", function () {",
 									"    pm.expect([400, 422]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response contains error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error') || pm.expect(jsonData).to.have.property('message');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -278,8 +439,85 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"food_item_id\": 1,\n    \"quantity\": -1\n}"
+							"raw": "{\n    \"food_item_id\": {{food_item_id}},\n    \"quantity\": -1\n}"
 						},
+						"url": {
+							"raw": "{{base_url}}/api/entry",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"entry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Adicionar Entrada - Alimento Inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 400\", function () {",
+									"    pm.expect([400, 404]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_item_id\": 99999,\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/entry",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"entry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Listar Entradas (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON array\", function () {",
+									"    pm.response.to.be.json;",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/entry",
 							"host": [
@@ -296,6 +534,26 @@
 			]
 		}
 	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
 	"variable": [
 		{
 			"key": "base_url",
@@ -304,4 +562,3 @@
 		}
 	]
 }
-

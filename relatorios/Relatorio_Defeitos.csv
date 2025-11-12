@@ -1,4 +1,0 @@
-ID,Título,Severidade,Prioridade,Status,Requisito(s),Caso(s) de Teste,Passos para Reproduzir,Resultado Esperado,Resultado Obtido,Evidência,Data Abertura,Data Fechamento,Responsável
-BUG-001,Status da entrada não atualiza imediatamente após adição,Média,Alta,RESOLVIDO,REQ-006,CT-007 CT-030,1. Fazer login 2. Adicionar alimento ao diário 3. Observar dashboard,Status deve atualizar imediatamente sem recarregar página,Status só atualiza após F5 (recarregar página),IMG-010-F VID-030-F,2025-01-15,2025-01-20,Dev1
-BUG-002,Mensagem de confirmação truncada no mobile,Baixa,Média,RESOLVIDO,REQ-014,CT-018,1. Acessar sistema no mobile 2. Adicionar alimento 3. Observar mensagem,Mensagem completa e visível,Mensagem cortada na tela,VID-030-F,2025-01-15,2025-01-21,Dev2
-

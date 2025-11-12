@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Script para executar testes automatizados e gerar relatórios.
+Script para executar testes automatizados e gerar relatórios formatados.
+Gera relatórios visuais e estatísticas detalhadas para análise e apresentação.
 """
 import os
 import sys
@@ -8,9 +10,21 @@ import subprocess
 import webbrowser
 from datetime import datetime
 
+# Configura encoding UTF-8 para Windows
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+def print_header(title):
+    """Imprime um cabeçalho formatado."""
+    print("\n" + "=" * 70)
+    print(f"  {title}")
+    print("=" * 70 + "\n")
+
 def run_tests():
     """Executa os testes e gera relatórios."""
-    print("🚀 Iniciando execução dos testes...")
+    print_header("EXECUCAO DE TESTES AUTOMATIZADOS")
     
     # Cria o diretório de relatórios se não existir
     os.makedirs("tests/reports", exist_ok=True)
@@ -18,26 +32,43 @@ def run_tests():
     # Gera um timestamp para os relatórios
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
+    print("[CONFIG] Configuracao:")
+    print(f"         Timestamp: {timestamp}")
+    print(f"         Diretorio de relatorios: tests/reports/")
+    print()
+    
     # Comando para executar os testes
     cmd = [
         "pytest",
+        "tests/unit/",
+        "tests/integration/",
+        "tests/tdd_example/",
         "-v",
         "--cov=app",
         "--cov-report=term-missing",
+        "--cov-report=html:tests/reports/coverage",
         f"--html=tests/reports/test_report_{timestamp}.html",
         "--self-contained-html",
-        "--cov-report=html:tests/reports/coverage"
+        "--tb=short"  # Traceback curto para output mais limpo
     ]
+    
+    print("[INFO] Executando testes...")
+    print("       (Aguarde, isso pode levar alguns segundos...)\n")
     
     # Executa os testes
     result = subprocess.run(cmd)
     
-    # Retorna o código de saída
+    print()
+    if result.returncode == 0:
+        print("[SUCESSO] Todos os testes executados com sucesso!")
+    else:
+        print("[AVISO] Alguns testes falharam. Verifique os detalhes acima.")
+    
     return result.returncode
 
 def generate_summary():
-    """Gera um resumo dos testes."""
-    print("\n📊 Gerando resumo dos testes...")
+    """Gera um resumo formatado dos testes."""
+    print_header("RESUMO DOS TESTES")
     
     # Conta o número total de testes
     test_files = []
@@ -46,102 +77,78 @@ def generate_summary():
             if file.startswith("test_") and file.endswith(".py"):
                 test_files.append(os.path.join(root, file))
     
-    # Conta o número de testes unitários, de integração e E2E
+    # Conta o número de testes por tipo
     unit_tests = len([f for f in test_files if "/unit/" in f.replace("\\", "/")])
     integration_tests = len([f for f in test_files if "/integration/" in f.replace("\\", "/")])
     e2e_tests = len([f for f in test_files if "/e2e/" in f.replace("\\", "/")])
+    tdd_tests = len([f for f in test_files if "/tdd" in f.replace("\\", "/")])
     
-    # Gera um resumo em HTML
-    summary = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Resumo dos Testes - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 20px; }}
-            .summary {{ 
-                background-color: #f5f5f5; 
-                border-radius: 5px; 
-                padding: 20px; 
-                margin-bottom: 20px;
-            }}
-            .test-type {{ 
-                margin: 10px 0; 
-                padding: 10px; 
-                border-left: 4px solid #4CAF50;
-                background-color: #e8f5e9;
-            }}
-            .metrics {{ 
-                display: flex; 
-                justify-content: space-around; 
-                margin: 20px 0; 
-            }}
-            .metric {{ 
-                text-align: center; 
-                padding: 10px; 
-                border-radius: 5px; 
-                background-color: #e3f2fd;
-                flex: 1;
-                margin: 0 5px;
-            }}
-            h1, h2 {{ color: #333; }}
-        </style>
-    </head>
-    <body>
-        <h1>Resumo dos Testes</h1>
-        <p>Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
-        
-        <div class="metrics">
-            <div class="metric">
-                <h3>Testes Unitários</h3>
-                <p>{unit_tests} arquivos</p>
-            </div>
-            <div class="metric">
-                <h3>Testes de Integração</h3>
-                <p>{integration_tests} arquivos</p>
-            </div>
-            <div class="metric">
-                <h3>Testes E2E</h3>
-                <p>{e2e_tests} arquivos</p>
-            </div>
-        </div>
-        
-        <div class="summary">
-            <h2>Próximos Passos</h2>
-            <p>Para visualizar os relatórios detalhados, abra os seguintes arquivos:</p>
-            <ul>
-                <li><strong>Relatório de Testes:</strong> tests/reports/test_report_*.html</li>
-                <li><strong>Cobertura de Código:</strong> tests/reports/coverage/index.html</li>
-            </ul>
-        </div>
-    </body>
-    </html>
-    """
+    total_files = len(test_files)
     
-    # Salva o resumo
-    with open("tests/reports/summary.html", "w", encoding="utf-8") as f:
-        f.write(summary)
+    print("[ARQUIVOS] Arquivos de Teste Encontrados:")
+    print(f"           Testes Unitarios:     {unit_tests:2d} arquivo(s)")
+    print(f"           Testes de Integracao: {integration_tests:2d} arquivo(s)")
+    print(f"           Testes E2E:           {e2e_tests:2d} arquivo(s)")
+    print(f"           Testes TDD:           {tdd_tests:2d} arquivo(s)")
+    print(f"           {'-' * 50}")
+    print(f"           TOTAL:                {total_files:2d} arquivo(s)")
+    print()
     
-    return summary
+    print("[RELATORIOS] Relatorios Gerados:")
+    print("             Relatorio HTML:        tests/reports/test_report_*.html")
+    print("             Cobertura de Codigo:   tests/reports/coverage/index.html")
+    print()
+    
+    return {
+        'unit': unit_tests,
+        'integration': integration_tests,
+        'e2e': e2e_tests,
+        'tdd': tdd_tests,
+        'total': total_files
+    }
 
 def main():
     """Função principal."""
-    # Instala as dependências de teste
-    print("🔧 Instalando dependências de teste...")
-    subprocess.run(["pip", "install", "-r", "requirements-test.txt"])
+    print_header("SISTEMA DE TESTES - CALORIE TRACKER")
+    
+    # Verifica se deve instalar dependências
+    if "--install-deps" in sys.argv:
+        print("[INFO] Instalando dependencias de teste...")
+        subprocess.run(["pip", "install", "-r", "requirements-test.txt"], check=False)
+        print()
     
     # Executa os testes
     return_code = run_tests()
     
     # Gera o resumo
-    generate_summary()
+    summary = generate_summary()
     
-    # Abre o relatório no navegador
-    print("\n✅ Testes concluídos!")
-    print("📂 Relatórios gerados em: tests/reports/")
+    # Resumo final
+    print_header("CONCLUSAO")
     
-    if "--no-browser" not in sys.argv:
-        webbrowser.open("file://" + os.path.abspath("tests/reports/summary.html"))
+    if return_code == 0:
+        print("[SUCESSO] Todos os testes passaram com sucesso!")
+    else:
+        print("[AVISO] Alguns testes falharam. Revise os detalhes acima.")
+    
+    print()
+    print("[RELATORIOS] Relatorios disponiveis em: tests/reports/")
+    print()
+    print("[DICAS]")
+    print("       • Abra tests/reports/coverage/index.html para ver a cobertura detalhada")
+    print("       • Execute 'python generate_presentation_report.py' para relatorio de apresentacao")
+    print("       • Execute 'python cleanup.py' para limpar arquivos temporarios")
+    print()
+    
+    # Abre o relatório no navegador (opcional)
+    if "--open-report" in sys.argv or ("--no-browser" not in sys.argv and return_code == 0):
+        if os.path.exists("tests/reports"):
+            report_files = [f for f in os.listdir("tests/reports") if f.startswith("test_report_") and f.endswith(".html")]
+            if report_files:
+                latest_report = sorted(report_files)[-1]
+                report_path = os.path.abspath(os.path.join("tests/reports", latest_report))
+                print(f"[NAVEGADOR] Abrindo relatorio: {latest_report}")
+                webbrowser.open(f"file://{report_path}")
     
     return return_code
 

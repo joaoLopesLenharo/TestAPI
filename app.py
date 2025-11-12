@@ -83,7 +83,7 @@ with app.app_context():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Routes
 # Forms
@@ -246,7 +246,7 @@ def add_entry():
         return jsonify({'error': 'Quantity must be greater than 0'}), 400
     
     # Verifica se o food_item existe
-    food_item = FoodItem.query.get(food_item_id)
+    food_item = db.session.get(FoodItem, food_item_id)
     if not food_item:
         return jsonify({'error': 'Food item not found'}), 404
     
