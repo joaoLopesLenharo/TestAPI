@@ -10,6 +10,14 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+def print_header(text):
+    """Imprime um cabeçalho formatado."""
+    print()
+    print("=" * 70)
+    print(f"  {text}")
+    print("=" * 70)
+    print()
+
 def run_tests_and_collect_results():
     """Executa os testes e coleta os resultados."""
     print("🧪 Executando testes...")
