@@ -5,6 +5,15 @@ from werkzeug.security import generate_password_hash
 from app import app, db, User, FoodItem, FoodEntry
 from datetime import datetime, timedelta
 
+# Importa sistema de evidências se disponível
+try:
+    from scripts.evidence_generator import get_evidence_generator, EvidenceGenerator
+    EVIDENCE_AVAILABLE = True
+    evidence_gen = None
+except ImportError:
+    EVIDENCE_AVAILABLE = False
+    evidence_gen = None
+
 @pytest.fixture(scope='module')
 def test_app():
     # Cria um arquivo temporário único para cada módulo de teste
@@ -137,3 +146,76 @@ def auth_client(test_client, test_user, test_app):
     with test_app.app_context():
         with test_client.session_transaction() as session:
             session.clear()
+
+# ===== Sistema de Evidências =====
+if EVIDENCE_AVAILABLE:
+    @pytest.fixture(scope="session", autouse=True)
+    def setup_evidence_generator():
+        """Configura o gerador de evidências para a sessão de testes."""
+        global evidence_gen
+        if os.getenv('CAPTURE_EVIDENCE', '0') == '1':
+            evidence_gen = get_evidence_generator()
+            yield
+            # Gera relatório final
+            if evidence_gen:
+                evidence_gen.generate_evidence_report()
+        else:
+            yield
+    
+    @pytest.fixture(scope="function")
+    def evidence_capture(request):
+        """
+        Fixture para captura de evidências durante testes.
+        Usa automaticamente o nome do teste para identificar evidências.
+        """
+        if not EVIDENCE_AVAILABLE or os.getenv('CAPTURE_EVIDENCE', '0') != '1':
+            # Retorna funções vazias se evidências não estão habilitadas
+            yield {
+                'screenshot': lambda driver, suffix="": "",
+                'start_video': lambda driver: False,
+                'capture_frame': lambda driver: None,
+                'stop_video': lambda suffix="": ""
+            }
+            return
+        
+        test_name = request.node.name
+        
+        def capture_screenshot(driver, suffix=""):
+            """Captura screenshot durante o teste."""
+            if driver and evidence_gen:
+                return evidence_gen.capture_screenshot(driver, test_name, suffix=suffix)
+            return ""
+        
+        def start_video(driver):
+            """Inicia gravação de vídeo."""
+            if driver and evidence_gen:
+                return evidence_gen.start_video_recording(driver, test_name)
+            return False
+        
+        def capture_frame(driver):
+            """Captura frame para vídeo."""
+            if driver and evidence_gen:
+                evidence_gen.capture_video_frame(driver, test_name)
+        
+        def stop_video(suffix=""):
+            """Para gravação de vídeo."""
+            if evidence_gen:
+                return evidence_gen.stop_video_recording(test_name, suffix=suffix)
+            return ""
+        
+        yield {
+            'screenshot': capture_screenshot,
+            'start_video': start_video,
+            'capture_frame': capture_frame,
+            'stop_video': stop_video
+        }
+else:
+    # Se evidências não estão disponíveis, cria fixture vazia
+    @pytest.fixture(scope="function")
+    def evidence_capture(request):
+        yield {
+            'screenshot': lambda driver, suffix="": "",
+            'start_video': lambda driver: False,
+            'capture_frame': lambda driver: None,
+            'stop_video': lambda suffix="": ""
+        }

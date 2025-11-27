@@ -1,0 +1,7 @@
+# Dependências para geração automática de evidências
+opencv-python>=4.8.0
+pillow>=10.0.0
+numpy>=1.24.0,<2.0.0  # opencv-python não é compatível com NumPy 2.x ainda
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+

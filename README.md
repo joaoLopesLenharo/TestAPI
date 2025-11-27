@@ -95,6 +95,39 @@ Após executar o seed, você pode usar as seguintes credenciais:
 
 ---
 
+## 📸 Sistema de Geração de Evidências
+
+O projeto inclui um **sistema autônomo** para gerar evidências (screenshots e vídeos) automaticamente durante a execução dos testes.
+
+### Instalação
+
+```bash
+pip install -r requirements-evidence.txt
+```
+
+### Uso Rápido
+
+```bash
+# Terminal 1: Inicie o servidor
+python app.py
+
+# Terminal 2: Gere todas as evidências automaticamente
+python scripts/generate_all_evidences.py
+```
+
+### Documentação Completa
+
+📄 **[scripts/README_EVIDENCE.md](scripts/README_EVIDENCE.md)** - Guia completo do sistema de evidências
+
+**Funcionalidades:**
+- ✅ Captura automática de screenshots (IMG-XXX.png)
+- ✅ Gravação automática de vídeos (VID-XXX.mp4)
+- ✅ Nomenclatura baseada em IDs de casos de teste
+- ✅ Captura automática de falhas
+- ✅ Relatório JSON de evidências
+
+---
+
 ## 🧪 Executando os Testes
 
 ### Opção 1: Executar todos os testes (Recomendado)

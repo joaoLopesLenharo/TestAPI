@@ -1,0 +1,18 @@
+{
+  "generated_at": "2025-11-27T20:24:23.945169",
+  "total_evidences": 2,
+  "evidences": [
+    {
+      "filename": "IMG-CT-TEST-SIMPL.png",
+      "type": "screenshot",
+      "size": 87252,
+      "created": "2025-11-27T20:23:49.556427"
+    },
+    {
+      "filename": "VID-CT-TEST-SIMPL.mp4",
+      "type": "video",
+      "size": 119622,
+      "created": "2025-11-27T20:23:58.983362"
+    }
+  ]
+}
