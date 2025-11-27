@@ -1,0 +1,21 @@
+Métrica,Valor,Observações
+Total de Requisitos,18,REQ-001 a REQ-018
+Total de Casos de Teste,22,CT-001 a CT-041
+Cobertura de Requisitos,100%,Todos os requisitos cobertos
+Taxa de Aprovação Ciclo 1,90.9%,20/22 casos passaram
+Taxa de Aprovação Ciclo 2,100%,6/6 casos passaram
+Total de Bugs Identificados,2,BUG-001 e BUG-002
+Bugs Corrigidos,2,100% dos bugs corrigidos
+Densidade de Defeitos,0.09,2 bugs / 22 casos
+Tempo Médio de Correção,5 horas,Por bug
+Cobertura de Código,85%,pytest-cov
+Testes Unitários,6,test_models.py
+Testes de Integração,4,test_auth_routes test_api_routes test_dashboard_routes
+Testes E2E,3,test_user_journey.py
+Testes API (Postman),5,CalorieTracker.postman_collection.json
+Total de Testes Automatizados,18,Unitários + Integração + E2E + API
+Taxa de Automação,81.8%,18/22 casos automatizados
+Tempo de Execução Total (Ciclo 1),45 minutos,Incluindo testes manuais e automatizados
+Tempo de Execução Total (Ciclo 2),15 minutos,Regressão apenas
+Evidências Capturadas,43,IMG-001 a IMG-041 + vídeos
+

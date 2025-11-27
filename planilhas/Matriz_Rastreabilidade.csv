@@ -1,0 +1,20 @@
+REQ,Descrição,Caso(s) de Teste,Evidência(s),Bug(s),Status
+REQ-001,Login válido,CT-001,VID-001 IMG-001,,Coberto
+REQ-002,Login inválido,CT-002,IMG-002,,Coberto
+REQ-003,Registro de usuário,CT-003,VID-003 IMG-003,,Coberto
+REQ-004,Validação de campos no registro,CT-004 CT-005 CT-006,IMG-004 IMG-005 IMG-006,,Coberto
+REQ-005,Listagem de alimentos,CT-007,IMG-007,,Coberto
+REQ-006,Adicionar entrada válida,CT-008,VID-008 IMG-008,,Coberto
+REQ-007,Validação de quantidade,CT-009 CT-010 CT-011,IMG-009 IMG-010 IMG-011,BUG-001,Coberto
+REQ-008,Dashboard - visualização de resumo,CT-012,IMG-012,,Coberto
+REQ-009,Cálculo de calorias consumidas,CT-013,IMG-013,,Coberto
+REQ-010,Cálculo de calorias restantes,CT-014 CT-015,IMG-014 IMG-015,,Coberto
+REQ-011,Acesso a alimentos privados,CT-016,IMG-016,,Coberto
+REQ-012,Lista vazia de alimentos,CT-017,IMG-017,,Coberto
+REQ-013,Lista vazia de entradas,CT-018,IMG-018,,Coberto
+REQ-014,Logout,CT-019,IMG-019,,Coberto
+REQ-015,Proteção de rotas,CT-020,IMG-020,,Coberto
+REQ-016,Fluxo E2E completo,CT-030,VID-030 IMG-030,,Coberto
+REQ-017,Usabilidade - mensagens claras,CT-040,VID-040,BUG-002,Coberto
+REQ-018,Performance - tempo de resposta,CT-041,IMG-041,,Coberto
+

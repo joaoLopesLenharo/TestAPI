@@ -1,0 +1,25 @@
+ID Caso,Objetivo,Data Execução,Executor,Status,Evidência,Observações
+CT-001,Validar login com credenciais válidas,2025-11-27,QA Executor,PASSOU,VID-001 IMG-001,Login funcionou corretamente redirecionamento para dashboard
+CT-002,Validar login com credenciais inválidas,2025-11-27,QA Executor,PASSOU,IMG-002,Mensagem de erro exibida corretamente
+CT-003,Validar registro de novo usuário,2025-11-27,QA Executor,PASSOU,VID-003 IMG-003,Registro funcionou usuário criado com sucesso
+CT-004,Validar registro com username duplicado,2025-11-27,QA Executor,PASSOU,IMG-004,Mensagem de validação exibida corretamente
+CT-005,Validar registro com email duplicado,2025-11-27,QA Executor,PASSOU,IMG-005,Mensagem de validação exibida corretamente
+CT-006,Validar registro com senhas não coincidem,2025-11-27,QA Executor,PASSOU,IMG-006,Mensagem de validação exibida corretamente
+CT-007,Validar listagem de alimentos,2025-11-27,QA Executor,PASSOU,IMG-007,Lista retornada corretamente com alimentos públicos e privados
+CT-008,Validar adição de entrada com quantidade válida,2025-11-27,QA Executor,PASSOU,VID-008 IMG-008,Entrada adicionada com sucesso status 201 retornado
+CT-009,Validar adição de entrada com quantity = 0,2025-11-27,QA Executor,PASSOU,IMG-009,Mensagem de erro exibida corretamente
+CT-010,Validar adição de entrada com quantity < 0,2025-11-27,QA Executor,PASSOU,IMG-010,Mensagem de erro exibida corretamente
+CT-011,Validar adição de entrada sem food_item_id,2025-11-27,QA Executor,PASSOU,IMG-011,Mensagem de erro exibida corretamente
+CT-012,Validar visualização de dashboard com entradas,2025-11-27,QA Executor,PASSOU,IMG-012,Dashboard exibiu totais corretamente
+CT-013,Validar cálculo de calorias consumidas,2025-11-27,QA Executor,PASSOU,IMG-013,Cálculo correto: (52×2) + (165×1) = 269 calorias
+CT-014,Validar cálculo de calorias restantes,2025-11-27,QA Executor,PASSOU,IMG-014,Cálculo correto: 2000 - 500 = 1500 calorias restantes
+CT-015,Validar calorias restantes nunca negativo,2025-11-27,QA Executor,PASSOU,IMG-015,Retornou 0 quando consumido > meta (correto)
+CT-016,Validar acesso a alimento privado de outro usuário,2025-11-27,QA Executor,PASSOU,IMG-016,Alimento privado não aparece na lista (correto)
+CT-017,Validar lista vazia de alimentos,2025-11-27,QA Executor,PASSOU,IMG-017,Lista vazia retornada corretamente
+CT-018,Validar dashboard com lista vazia de entradas,2025-11-27,QA Executor,PASSOU,IMG-018,Totais zerados exibidos corretamente
+CT-019,Validar logout,2025-11-27,QA Executor,PASSOU,IMG-019,Logout funcionou sessão encerrada
+CT-020,Validar proteção de rotas sem autenticação,2025-11-27,QA Executor,PASSOU,IMG-020,Redirecionamento para login funcionou
+CT-030,Validar fluxo E2E completo,2025-11-27,QA Executor,FALHOU,VID-030-F IMG-030-F,Mensagem de confirmação truncada no mobile (BUG-002)
+CT-040,Validar usabilidade - mensagens claras,2025-11-27,QA Executor,FALHOU,VID-040-F IMG-040-F,Contraste baixo no botão Adicionar Alimento (BUG-002)
+CT-041,Validar performance - tempo de resposta,2025-11-27,QA Executor,PASSOU,IMG-041,Todas as requisições responderam em < 2s
+

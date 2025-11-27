@@ -1,0 +1,8 @@
+ID Caso,Objetivo,Data Execução,Executor,Status,Evidência,Observações
+CT-030,Validar fluxo E2E completo,2025-12-04,QA Executor,PASSOU,VID-030 IMG-030,Bug corrigido mensagem exibida corretamente
+CT-040,Validar usabilidade - mensagens claras,2025-12-04,QA Executor,PASSOU,VID-040 IMG-040,Contraste ajustado botão visível
+CT-008,Validar adição de entrada com quantidade válida,2025-12-04,QA Executor,PASSOU,VID-008-R IMG-008-R,Regressão: funcionalidade mantida após correções
+CT-012,Validar visualização de dashboard com entradas,2025-12-04,QA Executor,PASSOU,IMG-012-R,Regressão: dashboard funcionando corretamente
+CT-001,Validar login com credenciais válidas,2025-12-04,QA Executor,PASSOU,IMG-001-R,Regressão: login funcionando corretamente
+CT-007,Validar listagem de alimentos,2025-12-04,QA Executor,PASSOU,IMG-007-R,Regressão: listagem funcionando corretamente
+
